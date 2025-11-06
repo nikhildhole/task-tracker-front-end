@@ -1,0 +1,38 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set version
+      run: echo "VERSION=1.0.0" >> $GITHUB_ENV
+
+    - name: Get repository name
+      run: echo "IMAGE_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build Docker image
+      run: |
+        docker build . \
+          --file Dockerfile \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${VERSION} \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:latest
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${VERSION}
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:latest

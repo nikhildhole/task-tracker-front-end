@@ -25,6 +25,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV NEXT_PUBLIC_BACK_END_API_URL="http://back-end.example.com"
 
 # Copy necessary files from builder
 COPY --from=builder /app/package*.json ./

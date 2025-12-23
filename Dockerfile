@@ -28,11 +28,21 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy necessary files from builder
+# Create non-root user/group
+RUN addgroup -g 10001 app && \
+    adduser -D -u 10001 -G app app
+
+# Copy app files
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
+
+# Fix ownership
+RUN chown -R 10001:10001 /app
+
+# Switch to non-root
+USER 10001
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]
